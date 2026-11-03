@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.env
+.env.*
+!.env.example
+.aws/
+.codex/
+.agents/
+referencias teoricas/
+desafio_tecnico_ai_eng_artefact.pdf
+data/*.csv
+runtime/
+*.sqlite*
+.coverage
+htmlcov/
+.DS_Store
