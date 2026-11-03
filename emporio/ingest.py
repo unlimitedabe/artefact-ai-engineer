@@ -10,18 +10,32 @@ import tempfile
 from datetime import date
 from pathlib import Path
 
-from emporio.text import normalize, to_cents
+from emporio.text import to_cents
 
 SCHEMAS = {
     "categories": ["category_id", "name", "description"],
     "customers": ["customer_id", "name", "phone", "email", "city"],
     "products": [
-        "product_id", "price_brl", "name", "category_id", "description", "stock_quantity",
-        "status", "specs", "created_at",
+        "product_id",
+        "price_brl",
+        "name",
+        "category_id",
+        "description",
+        "stock_quantity",
+        "status",
+        "specs",
+        "created_at",
     ],
     "orders": [
-        "order_id", "customer_id", "order_date", "status", "total_brl", "payment_method",
-        "tracking_code", "estimated_delivery", "notes",
+        "order_id",
+        "customer_id",
+        "order_date",
+        "status",
+        "total_brl",
+        "payment_method",
+        "tracking_code",
+        "estimated_delivery",
+        "notes",
     ],
     "order_items": ["order_id", "quantity", "product_id"],
     "promotions": ["promotion_id", "product_id", "discount_percent", "description", "is_active"],
@@ -66,8 +80,14 @@ def source_files(directory: Path) -> dict[str, Path]:
     """Accept canonical filenames or the exact challenge export names, never ambiguous inputs."""
     result = {}
     for table in SCHEMAS:
-        matches = [p for p in [directory / f"{table}.csv",
-                              directory / f"desafio_tecnico_ai_eng - {table}.csv"] if p.exists()]
+        matches = [
+            p
+            for p in [
+                directory / f"{table}.csv",
+                directory / f"desafio_tecnico_ai_eng - {table}.csv",
+            ]
+            if p.exists()
+        ]
         if len(matches) != 1:
             raise DataError(f"Expected exactly one CSV for {table} in {directory}")
         result[table] = matches[0]
@@ -119,46 +139,83 @@ def build_database(directory: Path, destination: Path) -> dict:
         db.executescript(DDL)
         with db:
             for r in tables["categories"]:
-                db.execute("INSERT INTO categories VALUES (?,?,?)",
-                           (integer(r["category_id"]), r["name"], r["description"]))
+                db.execute(
+                    "INSERT INTO categories VALUES (?,?,?)",
+                    (integer(r["category_id"]), r["name"], r["description"]),
+                )
             for r in tables["customers"]:
                 email = r["email"].strip().casefold()
                 phone = re.sub(r"\D", "", r["phone"])
                 if "@" not in email or len(phone) not in (10, 11, 12, 13):
                     raise DataError("Invalid customer contact format")
-                db.execute("INSERT INTO customers VALUES (?,?,?,?,?)",
-                           (integer(r["customer_id"]), r["name"], phone, email, r["city"]))
+                db.execute(
+                    "INSERT INTO customers VALUES (?,?,?,?,?)",
+                    (integer(r["customer_id"]), r["name"], phone, email, r["city"]),
+                )
             for r in tables["products"]:
                 if not isinstance(json.loads(r["specs"]), dict):
                     raise DataError("Product specs must be a JSON object")
                 date.fromisoformat(r["created_at"])
-                db.execute("INSERT INTO products VALUES (?,?,?,?,?,?,?,?,?)", (
-                    integer(r["product_id"]), to_cents(r["price_brl"]), r["name"],
-                    integer(r["category_id"]), r["description"], integer(r["stock_quantity"], 0),
-                    r["status"], r["specs"], r["created_at"],
-                ))
+                db.execute(
+                    "INSERT INTO products VALUES (?,?,?,?,?,?,?,?,?)",
+                    (
+                        integer(r["product_id"]),
+                        to_cents(r["price_brl"]),
+                        r["name"],
+                        integer(r["category_id"]),
+                        r["description"],
+                        integer(r["stock_quantity"], 0),
+                        r["status"],
+                        r["specs"],
+                        r["created_at"],
+                    ),
+                )
             for r in tables["orders"]:
                 date.fromisoformat(r["order_date"])
                 if r["estimated_delivery"]:
-                    if date.fromisoformat(r["estimated_delivery"]) < date.fromisoformat(r["order_date"]):
+                    if date.fromisoformat(r["estimated_delivery"]) < date.fromisoformat(
+                        r["order_date"]
+                    ):
                         raise DataError("Estimated delivery precedes order date")
                 if r["payment_method"] not in {
-                    "pix", "debit", "boleto", "credit_3x", "credit_6x", "credit_12x",
+                    "pix",
+                    "debit",
+                    "boleto",
+                    "credit_3x",
+                    "credit_6x",
+                    "credit_12x",
                 }:
                     raise DataError("Unknown payment method")
-                db.execute("INSERT INTO orders VALUES (?,?,?,?,?,?,?,?,?)", (
-                    integer(r["order_id"]), integer(r["customer_id"]), r["order_date"], r["status"],
-                    to_cents(r["total_brl"]), r["payment_method"], r["tracking_code"] or None,
-                    r["estimated_delivery"] or None, r["notes"] or None,
-                ))
+                db.execute(
+                    "INSERT INTO orders VALUES (?,?,?,?,?,?,?,?,?)",
+                    (
+                        integer(r["order_id"]),
+                        integer(r["customer_id"]),
+                        r["order_date"],
+                        r["status"],
+                        to_cents(r["total_brl"]),
+                        r["payment_method"],
+                        r["tracking_code"] or None,
+                        r["estimated_delivery"] or None,
+                        r["notes"] or None,
+                    ),
+                )
             for r in tables["order_items"]:
-                db.execute("INSERT INTO order_items VALUES (?,?,?)",
-                           (integer(r["order_id"]), integer(r["quantity"]), integer(r["product_id"])))
+                db.execute(
+                    "INSERT INTO order_items VALUES (?,?,?)",
+                    (integer(r["order_id"]), integer(r["quantity"]), integer(r["product_id"])),
+                )
             for r in tables["promotions"]:
-                db.execute("INSERT INTO promotions VALUES (?,?,?,?,?)", (
-                    integer(r["promotion_id"]), integer(r["product_id"]),
-                    integer(r["discount_percent"]), r["description"], integer(r["is_active"], 0),
-                ))
+                db.execute(
+                    "INSERT INTO promotions VALUES (?,?,?,?,?)",
+                    (
+                        integer(r["promotion_id"]),
+                        integer(r["product_id"]),
+                        integer(r["discount_percent"]),
+                        r["description"],
+                        integer(r["is_active"], 0),
+                    ),
+                )
             missing_items = db.execute(
                 "SELECT order_id FROM orders WHERE order_id NOT IN (SELECT order_id FROM order_items)"
             ).fetchall()
@@ -173,8 +230,10 @@ def build_database(directory: Path, destination: Path) -> dict:
             report = {
                 "encoding": "utf-8-sig",
                 "rows": {table: len(rows) for table, rows in tables.items()},
-                "nulls": {table: {col: sum(not r[col] for r in rows) for col in SCHEMAS[table]}
-                          for table, rows in tables.items()},
+                "nulls": {
+                    table: {col: sum(not r[col] for r in rows) for col in SCHEMAS[table]}
+                    for table, rows in tables.items()
+                },
                 "historical_total_mismatches": [
                     {"order_id": a, "recorded_cents": b, "current_catalog_cents": c}
                     for a, b, c in mismatches
@@ -185,14 +244,18 @@ def build_database(directory: Path, destination: Path) -> dict:
                     "Orders have estimated delivery but no actual receipt date or sales channel.",
                 ],
             }
-            db.execute("INSERT INTO metadata VALUES ('fingerprint',?)",
-                       (fingerprint(source_files(directory)),))
+            db.execute(
+                "INSERT INTO metadata VALUES ('fingerprint',?)",
+                (fingerprint(source_files(directory)),),
+            )
             db.execute("INSERT INTO metadata VALUES ('report',?)", (json.dumps(report),))
         db.close()
         os.replace(temporary, destination)
         return report
     except (ValueError, sqlite3.Error, ArithmeticError) as exc:
-        raise DataError(f"Dataset validation failed ({type(exc).__name__}); check source CSVs") from exc
+        raise DataError(
+            f"Dataset validation failed ({type(exc).__name__}); check source CSVs"
+        ) from exc
     finally:
         db.close()
         Path(temporary).unlink(missing_ok=True)
@@ -221,9 +284,12 @@ def sanitize(source: Path, destination: Path) -> dict:
         for r in rows:
             if table == "customers":
                 customer_id = int(r["customer_id"])
-                r.update(name=f"Cliente Demonstração {customer_id:02d}",
-                         phone=f"0000000{customer_id:04d}",
-                         email=f"customer{customer_id:02d}@example.invalid", city="Cidade Demonstração")
+                r.update(
+                    name=f"Cliente Demonstração {customer_id:02d}",
+                    phone=f"0000000{customer_id:04d}",
+                    email=f"customer{customer_id:02d}@example.invalid",
+                    city="Cidade Demonstração",
+                )
             elif table == "orders":
                 if r["tracking_code"]:
                     r["tracking_code"] = f"DEMO{int(r['order_id']):09d}"
