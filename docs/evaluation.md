@@ -46,9 +46,25 @@ are captured from execution, not manually invented dialogue. The examples explic
 that no LLM or live store service was invoked. The offline provider supports only a small
 set of demonstration intents and should not be used as evidence of open-ended LLM ability.
 
-Real model validation was **not run**: no `OPENAI_API_KEY` was available in this session.
-`python scripts/smoke_openai.py` explicitly reported NOT RUN and exited 2 without calling
-a paid API. After adding a key, this script runs three small real-model turns, prints their
-answers/tool traces, and returns a failing exit code on missing expected tools or errors.
-It deliberately uses only sanitized data. Human review of generated answer correctness
-and language is still required; automated tool checks are not a substitute for that review.
+## Developer-reported manual API validation
+
+Rafael de Matos Abe confirmed that he manually ran the agent in **IA via API** mode with
+a real OpenAI API key and obtained satisfactory operation. This records the developer's
+confirmation, not a run performed or independently observed by the coding assistant.
+No specific prompts, conversation scenarios, transcripts, model/version details or quantitative
+results were supplied. No scenario-specific pass counts, latency, accuracy or coverage claims
+can be inferred from that confirmation.
+
+This manual validation is distinct from the offline automated suite and the five deterministic
+example conversations above. The examples remain offline transcripts; they have not been
+relabeled as evidence of the manual API run. A satisfactory manual run does not establish a
+systematic real-model benchmark or comprehensive human review of code and generated answers.
+
+During the initial assistant-led implementation, no `OPENAI_API_KEY` was available for the
+scripted smoke check: `python scripts/smoke_openai.py` reported NOT RUN and exited 2 without
+calling a paid API. That historical result does not contradict the subsequent developer-reported
+manual validation. There is no report that the developer ran this particular smoke script.
+With a key configured, the script runs three small real-model turns, prints their answers/tool
+traces, and returns a failing exit code on missing expected tools or errors. It deliberately
+uses only sanitized data. It remains an optional reproducible check; its three scenarios must
+not be attributed to the developer's manual validation without execution evidence.

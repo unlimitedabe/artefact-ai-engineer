@@ -67,11 +67,16 @@ customer and returns the same non-disclosing result as a nonexistent order.
   provider-failure fallback and polite redirection for unrelated requests.
 - Five [executed offline conversations](examples/), automated tests and an API smoke script.
 
-**Validation:** 89 tests passed, 0 failed in the full local suite, including Streamlit
-interaction tests. Ruff checks passed. Real remote LLM end-to-end validation was **not
-performed**, because no API key was available. SDK integration tests use a mocked HTTP
-transport; example conversations use the labeled offline provider. These are different
-levels of evidence, not a claim of verified production LLM quality. See [evaluation](docs/evaluation.md).
+**Automated validation:** 89 tests passed, 0 failed in the full local suite, including
+Streamlit interaction tests. Ruff checks passed. SDK integration tests use a mocked HTTP
+transport and make no paid API calls; the five example conversations use the labeled
+offline provider.
+
+**Developer-reported manual validation:** Rafael de Matos Abe confirmed that he ran the
+agent in **IA via API** mode with a real OpenAI API key and obtained satisfactory operation.
+No specific conversation scenarios, transcripts or quantitative results were provided.
+This manual confirmation is separate from the automated tests and offline examples;
+it is not a claim of measured production LLM quality. See [evaluation](docs/evaluation.md).
 
 The pinned dependencies, CSV loading and all tests were also checked in a second clean
 virtual environment. The Streamlit server started successfully and returned `ok` from
@@ -185,7 +190,8 @@ within its bound, then return a safe fallback. Quotes are calculated in Python.
 
 This evidence check is intentionally modest: it does not semantically verify every sentence,
 prove that each amount belongs to the correct product, or guarantee resistance to every
-prompt injection. Model behavior must still be evaluated with real API conversations.
+prompt injection. The developer's satisfactory manual run does not replace systematic
+evaluation of model behavior with real API conversations.
 Server-enforced tool allowlists and customer scoping remain effective independently of
 prompt compliance. Return checks are preliminary and never execute refund/return operations.
 
@@ -289,9 +295,10 @@ change orders, and it does not claim to have performed those actions.
 
 Known limitations include a historical snapshot, missing actual receipt dates/channels,
 no holiday calendar or carrier integration, small lexical alias coverage, no full semantic
-grounding validator, no empirical real-model evaluation without credentials, and no
-production authentication. The quote/precheck rules implement this specific version of
-the manual; updating the PDF requires reviewing those rules and rerunning tests.
+grounding validator, no systematic real-model benchmark, and no production authentication.
+The developer-reported manual run does not remove these limitations. The quote/precheck
+rules implement this version of the manual; updating the PDF requires reviewing those
+rules and rerunning tests.
 Unclear policy cases require the store team. See [documented assumptions](docs/data_audit.md).
 
 With more time, prioritize real-model regression conversations with human rubrics,
@@ -304,10 +311,21 @@ database and multi-agent orchestration are not prerequisites for this small asse
 
 OpenAI Codex was used as a coding assistant under human supervision for implementation,
 testing, code review and documentation. The developer is responsible for reviewing the
-solution and deciding what to submit. The checks described here were executed by the
-coding assistant; this statement does not claim that a human has already verified the
-code, generated answers or evaluation results. The original challenge permits coding
-assistants when their use is disclosed.
+solution and deciding what to submit. The automated checks and offline examples described
+here were executed by the coding assistant. Separately, the developer confirmed a manual
+run in **IA via API** mode with a real OpenAI API key and satisfactory operation. This
+does not establish a comprehensive human code review or a scenario-by-scenario evaluation
+of generated answers. The original challenge permits coding assistants when their use
+is disclosed.
 
 Submit the public repository link personally using the instructions and deadline in the
 recruitment email. No Google Form submission or email sending is part of this application.
+
+## Author
+
+Rafael de Matos Abe
+
+- Email: [rafaelabe0@gmail.com](mailto:rafaelabe0@gmail.com)
+- GitHub: [unlimitedabe](https://github.com/unlimitedabe)
+- LinkedIn: [Rafael de Matos Abe](https://www.linkedin.com/in/rafael-de-matos-abe-4802392b4/)
+- Portfolio: [portifolio-rafael-abe.vercel.app](https://portifolio-rafael-abe.vercel.app/)

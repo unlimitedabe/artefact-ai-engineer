@@ -75,6 +75,7 @@ with st.sidebar:
     st.caption(
         "Verificação por dados conhecidos é apenas um protótipo; não use dados reais neste chat."
     )
+    st.caption("Desenvolvido por [Rafael de Matos Abe](https://github.com/unlimitedabe)")
 
 settings = settings.model_copy(update={"mode": mode})
 if st.session_state.get("agent_mode") != mode:
