@@ -32,10 +32,15 @@ FALLBACK = (
 )
 
 
-def allowed_amounts(evidence: dict) -> set[str]:
+def allowed_amounts(evidence: dict) -> set[int]:
     """Reject BRL amounts absent from tool evidence, including PDF policy excerpts."""
     text = json.dumps(evidence, ensure_ascii=False)
-    return {re.sub(r"\s", "", m) for m in re.findall(r"R\$\s*[\d.]+(?:,\d{2})?", text)}
+    # Accept equivalent Brazilian display forms, including R$500 versus R$ 500,00.
+    amounts = set()
+    for match in re.findall(r"R\$\s*(\d[\d.]*(?:,\d{2})?)", text):
+        whole, _, fraction = match.rstrip(".").partition(",")
+        amounts.add(int(whole.replace(".", "")) * 100 + int(fraction or "0"))
+    return amounts
 
 
 class Agent:
@@ -108,8 +113,9 @@ class Agent:
                             "role": "developer",
                             "content": (
                                 "Answer was rejected: obtain current-turn evidence with tools. "
-                                "All money amounts must occur in evidence; use quote_product for calculations. "
-                                "If data unavailable, ask clarification without asserting store facts."
+                                "All money amounts must occur in evidence; use quote_product "
+                                "for calculations. If data unavailable, ask clarification "
+                                "without asserting store facts."
                             ),
                         }
                     )

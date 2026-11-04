@@ -122,7 +122,8 @@ class Store:
     def get_product_details(self, product_id: int) -> dict:
         with self.connect() as db:
             row = db.execute(
-                "SELECT p.*,c.name AS category FROM products p JOIN categories c USING(category_id) "
+                "SELECT p.*,c.name AS category FROM products p "
+                "JOIN categories c USING(category_id) "
                 "WHERE p.product_id=?",
                 (product_id,),
             ).fetchone()

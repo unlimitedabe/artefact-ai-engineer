@@ -217,7 +217,8 @@ def build_database(directory: Path, destination: Path) -> dict:
                     ),
                 )
             missing_items = db.execute(
-                "SELECT order_id FROM orders WHERE order_id NOT IN (SELECT order_id FROM order_items)"
+                "SELECT order_id FROM orders "
+                "WHERE order_id NOT IN (SELECT order_id FROM order_items)"
             ).fetchall()
             if missing_items:
                 raise DataError("An order has no line items")
